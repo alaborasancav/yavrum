@@ -1,77 +1,123 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Umay & Aga Manitaya</title>
-<style>
-body {
-  margin:0;
-  font-family: Arial, sans-serif;
-  background: linear-gradient(to bottom, #1E3A8A, #4F46E5);
-  color: white;
-  display:flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-  text-align: center;
-  padding:20px;
-}
-h1 { font-size: 2.5rem; margin-bottom: 20px; }
-button {
-  padding: 15px 30px;
-  font-size: 1.2rem;
-  background: white;
-  color: #1E3A8A;
-  border:none;
-  border-radius:10px;
-  cursor:pointer;
-  transition:0.3s;
-}
-button:hover { background:#E0E7FF; }
-#message {
-  margin-top:30px;
-  font-size: 1.2rem;
-  line-height:1.5;
-  display:none;
-}
-@media(max-width:480px){
-  h1{ font-size:2rem; }
-  #message{ font-size:1rem; }
-  button{ padding:12px 24px; font-size:1rem; }
-}
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Umay ♡ Utku</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #050505;
+            color: white;
+            font-family: 'Times New Roman', serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            text-align: center;
+            overflow: hidden;
+        }
+        .container {
+            padding: 20px;
+            max-width: 450px;
+            width: 90%;
+            z-index: 2;
+        }
+        #surpriseContent { display: none; opacity: 0; transition: opacity 2s ease-in; }
+        h1 { font-size: 2.8rem; margin-bottom: 25px; font-weight: 300; letter-spacing: 2px; }
+        p { 
+            font-style: italic; 
+            line-height: 2; 
+            font-size: 1.2rem; 
+            margin-bottom: 15px;
+            color: #e0e0e0;
+        }
+        .heart-line { 
+            margin-top: 30px; 
+            font-size: 1.3rem; 
+            letter-spacing: 3px;
+            font-weight: bold;
+        }
+        
+        .btn {
+            background: transparent;
+            color: white;
+            border: 1px solid white;
+            padding: 18px 50px;
+            font-size: 1.1rem;
+            letter-spacing: 4px;
+            cursor: pointer;
+            transition: all 0.5s ease;
+            text-transform: uppercase;
+        }
+        .btn:hover { 
+            background: white; 
+            color: black; 
+            box-shadow: 0 0 30px rgba(255,255,255,0.4);
+        }
+        
+        /* Arka plan derinliği */
+        .overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle at center, #111 0%, #000 100%);
+            z-index: 1;
+        }
+    </style>
 </head>
 <body>
+    <div class="overlay"></div>
 
-<h1>Umay 💙 Aga Manitaya</h1>
+    <div class="container">
+        <div id="startSection">
+            <button class="btn" onclick="startSurprise()">BAS</button>
+        </div>
 
-<button id="loveBtn">Sevgiyi Göster</button>
+        <div id="surpriseContent">
+            <h1>Umay</h1>
+            <p>
+                Gözlerinde buldum ben en güzel rotayı,<br>
+                Seninle sildim kalbimdeki her hatayı.<br>
+                Varlığın ruhuma en huzurlu liman,<br>
+                Duruyor sanki seni gördüğüm o an zaman.<br>
+                Sen benim dünyamdaki tek beyaz sayfasın,<br>
+                Ömrümün geri kalanında hep yanımda kalmalısın.
+            </p>
+            <div class="heart-line">UMAY 🤍 UTKU</div>
+        </div>
+    </div>
 
-<div id="message">
-  Umay, seni düşündükçe kalbim hızlanıyor.<br>
-  Seninle her an özel ve anlamlı.<br>
-  Gözlerin içimi ısıtıyor, gülüşün beni mutlu ediyor.<br>
-  Hayat seninle daha güzel, yanında olmak harika.<br>
-  Seni seviyorum, sonsuzca ve hep.
-</div>
+    <div id="player" style="position: absolute; top: -9999px;"></div>
 
-<!-- Audio -->
-<audio id="song">
-  <source src="https://www.example.com/mavi-gri-ben-sende-yandim.mp3" type="audio/mpeg">
-</audio>
+    <script>
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
 
-<script>
-const btn = document.getElementById("loveBtn");
-const msg = document.getElementById("message");
-const song = document.getElementById("song");
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0', width: '0',
+                videoId: '_UbhwIPyRHY',
+                playerVars: {
+                    'start': 145, // Gitar solosu başlangıcı (2:25)
+                    'autoplay': 0,
+                    'controls': 0
+                }
+            });
+        }
 
-btn.addEventListener("click", () => {
-  msg.style.display = "block";
-  song.play();
-});
-</script>
-
+        function startSurprise() {
+            document.getElementById('startSection').style.display = 'none';
+            var content = document.getElementById('surpriseContent');
+            content.style.display = 'block';
+            setTimeout(() => { content.style.opacity = '1'; }, 100);
+            
+            if (player && player.playVideo) {
+                player.playVideo();
+            }
+        }
+    </script>
 </body>
 </html>
