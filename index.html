@@ -38,7 +38,6 @@
             letter-spacing: 3px;
             font-weight: bold;
         }
-        
         .btn {
             background: transparent;
             color: white;
@@ -55,8 +54,6 @@
             color: black; 
             box-shadow: 0 0 30px rgba(255,255,255,0.4);
         }
-        
-        /* Arka plan derinliği */
         .overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -78,9 +75,9 @@
             <p>
                 Gözlerinde buldum ben en güzel rotayı,<br>
                 Seninle sildim kalbimdeki her hatayı.<br>
-                Varlığın ruhuma en huzurlu liman,<br>
-                Duruyor sanki seni gördüğüm o an zaman.<br>
-                Sen benim dünyamdaki tek beyaz sayfasın,<br>
+                Bakışın ömre bedel, ruhuma sessiz bir dua,<br>
+                Varlığın nefes gibi, muhtacım her an sana.<br>
+                Duruyor sanki seni gördüğüm o an zaman,<br>
                 Ömrümün geri kalanında hep yanımda kalmalısın.
             </p>
             <div class="heart-line">UMAY 🤍 UTKU</div>
@@ -100,11 +97,7 @@
             player = new YT.Player('player', {
                 height: '0', width: '0',
                 videoId: '_UbhwIPyRHY',
-                playerVars: {
-                    'start': 145, // Gitar solosu başlangıcı (2:25)
-                    'autoplay': 0,
-                    'controls': 0
-                }
+                playerVars: { 'autoplay': 0, 'controls': 0 }
             });
         }
 
@@ -115,6 +108,7 @@
             setTimeout(() => { content.style.opacity = '1'; }, 100);
             
             if (player && player.playVideo) {
+                player.seekTo(148); // Gitar solo kısmına atar (02:28)
                 player.playVideo();
             }
         }
