@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Umay & Aga Manitaya</title>
+<style>
+body {
+  margin:0;
+  font-family: Arial, sans-serif;
+  background: linear-gradient(to bottom, #1E3A8A, #4F46E5);
+  color: white;
+  display:flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+  padding:20px;
+}
+h1 { font-size: 2.5rem; margin-bottom: 20px; }
+button {
+  padding: 15px 30px;
+  font-size: 1.2rem;
+  background: white;
+  color: #1E3A8A;
+  border:none;
+  border-radius:10px;
+  cursor:pointer;
+  transition:0.3s;
+}
+button:hover { background:#E0E7FF; }
+#message {
+  margin-top:30px;
+  font-size: 1.2rem;
+  line-height:1.5;
+  display:none;
+}
+@media(max-width:480px){
+  h1{ font-size:2rem; }
+  #message{ font-size:1rem; }
+  button{ padding:12px 24px; font-size:1rem; }
+}
+</style>
+</head>
+<body>
+
+<h1>Umay 💙 Aga Manitaya</h1>
+
+<button id="loveBtn">Sevgiyi Göster</button>
+
+<div id="message">
+  Umay, seni düşündükçe kalbim hızlanıyor.<br>
+  Seninle her an özel ve anlamlı.<br>
+  Gözlerin içimi ısıtıyor, gülüşün beni mutlu ediyor.<br>
+  Hayat seninle daha güzel, yanında olmak harika.<br>
+  Seni seviyorum, sonsuzca ve hep.
+</div>
+
+<!-- Audio -->
+<audio id="song">
+  <source src="https://www.example.com/mavi-gri-ben-sende-yandim.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const btn = document.getElementById("loveBtn");
+const msg = document.getElementById("message");
+const song = document.getElementById("song");
+
+btn.addEventListener("click", () => {
+  msg.style.display = "block";
+  song.play();
+});
+</script>
+
+</body>
+</html>
