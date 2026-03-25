@@ -3,109 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sancav | Hızlı Analiz</title>
+    <title>Sancav | Auto Analiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #05070a; color: #f1f5f9; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.9); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.03); }
-        .sancav-btn { background: linear-gradient(135deg, #4338ca 0%, #7e22ce 100%); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .sancav-btn:hover { box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); transform: translateY(-1px); }
-        textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: #94a3b8 !important; resize: none; }
-        textarea:focus { border-color: #4f46e5 !important; outline: none; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 10px; }
+        body { background-color: #030712; color: #f9fafb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
+        .glass { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
+        .sancav-gradient { background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%); }
+        .btn-magic { background: #1e293b; border: 1px dashed #6366f1; transition: all 0.3s; }
+        .btn-magic:hover { background: #312e81; border-style: solid; transform: translateY(-2px); }
+        textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: #cbd5e1 !important; resize: none; transition: 0.3s; }
+        textarea:focus { border-color: #6366f1 !important; outline: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); }
+        .result-card { animation: slideUp 0.4s ease-out forwards; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body class="flex flex-col min-h-screen items-center justify-center p-4">
+<body class="flex flex-col min-h-screen items-center p-4 md:p-10">
 
-    <div class="w-full max-w-3xl glass p-8 md:p-12 rounded-[2rem] shadow-2xl">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-black tracking-tighter text-white uppercase italic">Sancav Analiz</h1>
-            <p class="text-gray-500 text-[10px] mt-2 tracking-[0.3em] uppercase">Hızlı • Güvenli • Otomatik Ayıklama</p>
+    <div class="w-full max-w-4xl glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
+        <header class="text-center mb-12">
+            <h1 class="text-5xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
+                Sancav Analiz
+            </h1>
+            <p class="text-gray-500 text-[10px] mt-3 tracking-[0.4em] uppercase font-bold">Hız • Strateji • Otomasyon</p>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="mb-12 p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 text-center">
+            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Otomatik Çekme Yöntemi</h3>
+            <p class="text-[11px] text-gray-400 mb-6">Aşağıdaki butonu Yer İmleri çubuğuna sürükle. Instagram'da listeni açınca ona bas, gerisini Sancav halletsin.</p>
+            <a href="javascript:(function(){const getNames=()=>{const s=Array.from(document.querySelectorAll('span._ap35')).map(e=>e.innerText).filter(n=>n.length>2);return [...new Set(s)].join(',');};const flw=getNames();const url=window.location.origin;alert('Liste taranıyor...');window.location.href='https://'+window.location.host+'/分析?data='+btoa(flw);})();" 
+               class="btn-magic inline-block px-8 py-3 rounded-full text-xs font-bold text-indigo-300 cursor-move">
+               🚀 Sancav'ı Çubuğa Sürükle
+            </a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div class="space-y-3">
-                <div class="flex justify-between items-center px-1">
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Takip Ettiklerin</label>
-                    <span id="countFollowing" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-white font-mono">0</span>
+                <div class="flex justify-between items-center px-2">
+                    <label class="text-[10px] font-black uppercase tracking-tighter text-indigo-500">Takip Ettiklerin</label>
+                    <span id="countFollowing" class="text-[10px] font-mono text-gray-500">0</span>
                 </div>
-                <textarea id="following" oninput="autoProcess()" placeholder="" class="w-full h-40 p-5 rounded-2xl text-sm leading-relaxed"></textarea>
+                <textarea id="following" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs"></textarea>
             </div>
 
             <div class="space-y-3">
-                <div class="flex justify-between items-center px-1">
-                    <label class="text-[10px] font-bold uppercase tracking-widest text-indigo-400">Takipçilerin</label>
-                    <span id="countFollowers" class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-white font-mono">0</span>
+                <div class="flex justify-between items-center px-2">
+                    <label class="text-[10px] font-black uppercase tracking-tighter text-indigo-500">Takipçilerin</label>
+                    <span id="countFollowers" class="text-[10px] font-mono text-gray-500">0</span>
                 </div>
-                <textarea id="followers" oninput="autoProcess()" placeholder="" class="w-full h-40 p-5 rounded-2xl text-sm leading-relaxed"></textarea>
+                <textarea id="followers" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs"></textarea>
             </div>
         </div>
 
-        <button onclick="smartAnalyze()" class="w-full mt-10 py-5 rounded-2xl sancav-btn font-black text-white shadow-lg uppercase tracking-widest text-sm">
+        <button onclick="startAnalysis()" class="w-full mt-10 py-5 rounded-2xl sancav-gradient font-black text-white text-sm uppercase tracking-widest shadow-lg hover:opacity-90 active:scale-[0.99] transition-all">
             Analizi Başlat
         </button>
 
-        <div id="resultArea" class="hidden mt-12 animate-pulse-once">
-            <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-4">
-                <h2 class="text-lg font-bold text-white uppercase italic">Ekenler Listesi</h2>
-                <span id="badCount" class="text-red-500 text-xs font-black tracking-tighter">0 KİŞİ</span>
+        <div id="resultArea" class="hidden mt-16">
+            <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-5">
+                <h2 class="text-xl font-black italic uppercase tracking-tighter">Seni Takip Etmeyenler</h2>
+                <span id="badCount" class="text-red-500 font-black text-sm uppercase">0 Kişi</span>
             </div>
-            <div id="results" class="grid grid-cols-2 sm:grid-cols-3 gap-3"></div>
+            <div id="results" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
         </div>
     </div>
 
-    <footer class="mt-12 mb-6 text-[10px] text-gray-700 tracking-[0.6em] uppercase font-bold">
+    <footer class="mt-16 mb-8 text-[9px] text-gray-700 tracking-[0.8em] uppercase font-black">
         created by sancav
     </footer>
 
     <script>
-        // Metinden kullanıcı adlarını süzüp temizleyen çekirdek fonksiyon
-        function extractUsernames(text) {
+        function parseNames(text) {
             if (!text) return [];
-            // Instagram sayfasından kopyalanan her şeyi ayıklar
             const regex = /([a-z0-9._]{3,30})/gi;
             const matches = text.match(regex) || [];
-            
-            const forbidden = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'ayarları', 'mesaj', 'hikaye'];
+            const filterOut = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested'];
             return [...new Set(matches.map(m => m.toLowerCase()))]
-                   .filter(m => m.length > 2 && !forbidden.includes(m) && isNaN(m));
+                   .filter(m => m.length > 2 && !filterOut.includes(m) && isNaN(m));
         }
 
-        // Kullanıcı yapıştırdığı anda sayıyı otomatik günceller
-        function autoProcess() {
-            const followingList = extractUsernames(document.getElementById('following').value);
-            const followersList = extractUsernames(document.getElementById('followers').value);
-            
-            document.getElementById('countFollowing').innerText = followingList.length;
-            document.getElementById('countFollowers').innerText = followersList.length;
+        function updateCounts() {
+            document.getElementById('countFollowing').innerText = parseNames(document.getElementById('following').value).length;
+            document.getElementById('countFollowers').innerText = parseNames(document.getElementById('followers').value).length;
         }
 
-        function smartAnalyze() {
-            const followingList = extractUsernames(document.getElementById('following').value);
-            const followersList = extractUsernames(document.getElementById('followers').value);
+        function startAnalysis() {
+            const following = parseNames(document.getElementById('following').value);
+            const followers = parseNames(document.getElementById('followers').value);
 
-            if (followingList.length === 0 || followersList.length === 0) {
-                alert("Önce listeleri yapıştır aga.");
+            if (following.length === 0 || followers.length === 0) {
+                alert("Önce verileri gir aga.");
                 return;
             }
 
-            const nonBack = followingList.filter(user => !followersList.includes(user));
-
+            const unrequited = following.filter(u => !followers.includes(u));
             const resultArea = document.getElementById('resultArea');
             const resultsDiv = document.getElementById('results');
-            const badCount = document.getElementById('badCount');
-
+            
             resultsDiv.innerHTML = "";
-            badCount.innerText = `${nonBack.length} KİŞİ`;
+            document.getElementById('badCount').innerText = unrequited.length + " KİŞİ";
             resultArea.classList.remove('hidden');
 
-            nonBack.forEach(user => {
+            unrequited.forEach(user => {
                 const card = document.createElement('div');
-                card.className = "bg-[#0a101f] border border-slate-800 p-3 rounded-xl flex items-center justify-between group hover:border-indigo-500 transition-all";
+                card.className = "result-card bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center gap-2 group hover:border-indigo-500/50 transition-all";
                 card.innerHTML = `
-                    <span class="text-[11px] font-medium text-slate-400">@${user}</span>
-                    <a href="https://instagram.com/${user}" target="_blank" class="text-[9px] text-indigo-500 font-bold opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-tighter">GİT</a>
+                    <span class="text-[10px] font-bold text-slate-400 group-hover:text-indigo-300">@${user}</span>
+                    <a href="https://instagram.com/${user}" target="_blank" class="text-[8px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full uppercase font-black tracking-tighter hover:bg-indigo-500 hover:text-white transition-all">Profili Aç</a>
                 `;
                 resultsDiv.appendChild(card);
             });
