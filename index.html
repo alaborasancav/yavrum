@@ -1,192 +1,88 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sancav | Ultra Video Analiz</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@ffmpeg/ffmpeg@0.11.6/dist/ffmpeg.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
-    <style>
-        body { background-color: #020617; color: #f1f5f9; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.03); }
-        .sancav-gradient { background: linear-gradient(135deg, #4f46e5 0%, #a855f7 100%); }
-        .btn-magic { background: #1e293b; border: 1px dashed #6366f1; transition: all 0.3s; }
-        .btn-magic:hover { background: #312e81; border-style: solid; transform: translateY(-2px); }
-        .loader { border: 4px solid #f3f3f3; border-top: 4px solid #6366f1; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; display: inline-block; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .result-card { animation: slideUp 0.4s ease-out forwards; }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-    </style>
-</head>
-<body class="flex flex-col min-h-screen items-center p-4 md:p-10">
-
-    <div class="w-full max-w-4xl glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
-        <header class="text-center mb-12">
-            <h1 class="text-5xl font-black tracking-tighter uppercase italic bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
-                Sancav Analiz
-            </h1>
-            <p class="text-gray-500 text-[10px] mt-3 tracking-[0.4em] uppercase font-bold">Hız • Strateji • Video Otomasyon</p>
-        </header>
-
-        <div class="mb-12 p-8 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 text-center">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Video Analiz Yöntemi</h3>
-            <p class="text-[11px] text-gray-400 mb-8 leading-relaxed">Instagram'da listeni aç, hızlıca aşağı kaydırarak bir ekran videosu çek. <br> Videoları aşağıdaki butonlarla yükle, gerisini Sancav AI halletsin.</p>
-            
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-indigo-500">1. Takip Ettiklerin Videosu</label>
-                    <input type="file" id="videoFollowing" accept="video/*" class="hidden" onchange="processVideo('following')">
-                    <button onclick="document.getElementById('videoFollowing').click()" class="btn-magic w-full py-4 rounded-xl text-xs font-bold text-indigo-300">
-                        📹 Video Seç
-                    </button>
-                    <div id="statusFollowing" class="text-[10px] text-gray-500 font-mono">Bekleniyor...</div>
-                </div>
-
-                <div class="space-y-4">
-                    <label class="text-[10px] font-black uppercase tracking-widest text-indigo-500">2. Takipçilerin Videosu</label>
-                    <input type="file" id="videoFollowers" accept="video/*" class="hidden" onchange="processVideo('followers')">
-                    <button onclick="document.getElementById('videoFollowers').click()" class="btn-magic w-full py-4 rounded-xl text-xs font-bold text-indigo-300">
-                        📹 Video Seç
-                    </button>
-                    <div id="statusFollowers" class="text-[10px] text-gray-500 font-mono">Bekleniyor...</div>
-                </div>
-            </div>
-
-            <div id="processingStatus" class="hidden mt-10 p-4 rounded-xl bg-slate-900 border border-slate-800 text-sm">
-                <div class="loader mr-3 vertical-middle"></div>
-                <span id="processText" class="text-gray-400">Video işleniyor, lütfen bekleyin...</span>
-                <div class="text-[10px] text-indigo-400 mt-1">Bu işlem videonun uzunluğuna göre 1-2 dakika sürebilir.</div>
-            </div>
-        </div>
-
-        <button id="analyzeBtn" onclick="startAnalysis()" class="hidden w-full mt-10 py-5 rounded-2xl sancav-gradient font-black text-white text-sm uppercase tracking-widest shadow-lg hover:opacity-90 active:scale-[0.99] transition-all">
-            Analizi Başlat
-        </button>
-
-        <div id="resultArea" class="hidden mt-16">
-            <div class="flex items-center justify-between mb-8 border-b border-slate-800 pb-5">
-                <h2 class="text-xl font-black italic uppercase tracking-tighter text-white">Ekenler Listesi</h2>
-                <span id="badCount" class="text-red-500 font-black text-sm uppercase">0 KİŞİ</span>
-            </div>
-            <div id="results" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4"></div>
-        </div>
-    </div>
-
-    <footer class="mt-16 mb-8 text-[9px] text-gray-700 tracking-[0.8em] uppercase font-black">
-        created by sancav
-    </footer>
-
-    <script>
-        // Yapay Zeka (OCR) Motorunu Başlat
-        const worker = Tesseract.createWorker({
-            logger: m => console.log(m.status + ': ' + m.progress)
-        });
-        let followingList = [];
-        let followersList = [];
-
-        async function initOCR() {
-            await worker.load();
-            await worker.loadLanguage('eng');
-            await worker.initialize('eng');
+// Yapay Zeka (OCR) Motorunu Daha Hızlı Yapılandır
+const worker = Tesseract.createWorker({
+    cacheMethod: 'readOnly',
+    logger: m => {
+        if(m.status === 'recognizing text') {
+            const progress = (m.progress * 100).toFixed(0);
+            document.getElementById('processText').innerText = `Tarama Hızı: %${progress}`;
         }
-        initOCR();
+    }
+});
 
-        // Akıllı Ayıştırıcı
-        function parseNames(text) {
-            if (!text) return [];
-            const regex = /([a-z0-9._]{3,30})/gi;
-            const matches = text.match(regex) || [];
-            const filterOut = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested', 'kapat', 'çıkış', 'ayarlar'];
-            return [...new Set(matches.map(m => m.toLowerCase()))]
-                   .filter(m => m.length > 2 && !filterOut.includes(m) && isNaN(m));
-        }
+let followingList = [];
+let followersList = [];
 
-        // Video İşleme Fonksiyonu
-        async function processVideo(type) {
-            const fileInput = document.getElementById(type === 'following' ? 'videoFollowing' : 'videoFollowers');
-            const file = fileInput.files[0];
-            const statusDiv = document.getElementById(type === 'following' ? 'statusFollowing' : 'statusFollowers');
-            const processingStatus = document.getElementById('processingStatus');
-            const processText = document.getElementById('processText');
+async function initOCR() {
+    await worker.load();
+    await worker.loadLanguage('eng');
+    await worker.initialize('eng');
+    // Sadece alfanümerik karakterlere odaklan (Hızı artırır)
+    await worker.setParameters({
+        tessedit_char_whitelist: 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789._',
+    });
+}
+initOCR();
 
-            if (!file) return;
+function parseNames(text) {
+    if (!text) return [];
+    const regex = /([a-z0-9._]{3,30})/gi;
+    const matches = text.match(regex) || [];
+    const filterOut = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested'];
+    return [...new Set(matches.map(m => m.toLowerCase()))]
+           .filter(m => m.length > 2 && !filterOut.includes(m) && isNaN(m));
+}
 
-            statusDiv.innerText = "Video seçildi, işleniyor...";
-            processingStatus.classList.remove('hidden');
-            processText.innerText = `${type === 'following' ? 'Takip Ettiklerin' : 'Takipçilerin'} videosu Yapay Zeka tarafından taranıyor...`;
+async function processVideo(type) {
+    const fileInput = document.getElementById(type === 'following' ? 'videoFollowing' : 'videoFollowers');
+    const file = fileInput.files[0];
+    const statusDiv = document.getElementById(type === 'following' ? 'statusFollowing' : 'statusFollowers');
+    const processingStatus = document.getElementById('processingStatus');
+    
+    if (!file) return;
 
-            // Videodan kareleri yakalamak için Canvas kullanacağız
-            const video = document.createElement('video');
-            video.src = URL.createObjectURL(file);
-            video.muted = true;
-            await video.play();
+    statusDiv.innerText = "Yükleniyor...";
+    processingStatus.classList.remove('hidden');
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const namesFound = new Set();
+    const video = document.createElement('video');
+    video.src = URL.createObjectURL(file);
+    video.muted = true;
+    
+    await new Promise((resolve) => {
+        video.onloadedmetadata = () => resolve();
+    });
 
-            // Videoyu saniyede 1 kez tara (Hız ve doğruluk dengesi)
-            const duration = video.duration;
-            for (let i = 0; i < duration; i += 1) {
-                video.currentTime = i;
-                await new Promise(r => video.onseeked = r); // Video karesinin yüklenmesini bekle
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d', { alpha: false }); // Performans için alpha kapatıldı
+    const namesFound = new Set();
 
-                canvas.width = video.videoWidth;
-                canvas.height = video.videoHeight;
-                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    // TURBO AYARI: Videoyu her 1.5 saniyede bir tara (Hız için ideal)
+    const duration = video.duration;
+    for (let i = 0; i < duration; i += 1.5) {
+        video.currentTime = i;
+        await new Promise(r => video.onseeked = r);
 
-                // Kareyi OCR ile tara
-                const { data: { text } } = await worker.recognize(canvas);
-                const names = parseNames(text);
-                names.forEach(name => namesFound.add(name));
-                
-                statusDiv.innerText = `Taranan Süre: ${i.toFixed(1)}s / ${duration.toFixed(1)}s - Bulunan İsim: ${namesFound.size}`;
-            }
+        // Çözünürlüğü optimize et (Görüntüyü küçültmek işlemi hızlandırır)
+        canvas.width = 400; 
+        canvas.height = (video.videoHeight / video.videoWidth) * 400;
+        
+        // Siyah-beyaz filtre (OCR daha hızlı okur)
+        ctx.filter = 'grayscale(100%) contrast(150%)';
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-            video.pause();
-            
-            if (type === 'following') {
-                followingList = [...namesFound];
-            } else {
-                followersList = [...namesFound];
-            }
+        const { data: { text } } = await worker.recognize(canvas);
+        const names = parseNames(text);
+        names.forEach(name => namesFound.add(name));
+        
+        statusDiv.innerText = `%${((i/duration)*100).toFixed(0)} tamamlandı...`;
+    }
 
-            statusDiv.innerText = `Bitti! ${namesFound.size} isim bulundu.`;
-            processingStatus.classList.add('hidden');
-            
-            // İki liste de hazırsa analiz butonunu göster
-            if (followingList.length > 0 && followersList.length > 0) {
-                document.getElementById('analyzeBtn').classList.remove('hidden');
-            }
-        }
+    if (type === 'following') followingList = [...namesFound];
+    else followersList = [...namesFound];
 
-        function startAnalysis() {
-            if (followingList.length === 0 || followersList.length === 0) {
-                alert("Önce iki videoyu da yükleyip Yapay Zeka'nın taramasını beklemelisin aga.");
-                return;
-            }
-
-            const unrequited = followingList.filter(u => !followersList.includes(u));
-            const resultArea = document.getElementById('resultArea');
-            const resultsDiv = document.getElementById('results');
-            
-            resultsDiv.innerHTML = "";
-            document.getElementById('badCount').innerText = unrequited.length + " KİŞİ";
-            resultArea.classList.remove('hidden');
-
-            unrequited.forEach(user => {
-                const card = document.createElement('div');
-                card.className = "result-card bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center gap-2 group hover:border-indigo-500/50 transition-all";
-                card.innerHTML = `
-                    <span class="text-[10px] font-bold text-slate-400 group-hover:text-indigo-300">@${user}</span>
-                    <a href="https://instagram.com/${user}" target="_blank" class="text-[8px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full uppercase font-black tracking-tighter hover:bg-indigo-500 hover:text-white transition-all">Profili Aç</a>
-                `;
-                resultsDiv.appendChild(card);
-            });
-            resultArea.scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
-</body>
-</html>
+    statusDiv.innerText = `Bitti! ${namesFound.size} kişi bulundu.`;
+    processingStatus.classList.add('hidden');
+    
+    if (followingList.length > 0 && followersList.length > 0) {
+        document.getElementById('analyzeBtn').classList.remove('hidden');
+    }
+}
