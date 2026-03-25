@@ -10,10 +10,10 @@
         body { background-color: #030712; color: #f9fafb; font-family: 'Inter', sans-serif; overflow-x: hidden; }
         .glass { background: rgba(17, 24, 39, 0.8); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.05); }
         .sancav-gradient { background: linear-gradient(135deg, #4f46e5 0%, #9333ea 100%); }
-        .btn-magic { background: #1e293b; border: 1px dashed #6366f1; transition: all 0.3s; }
+        .btn-magic { background: #1e293b; border: 1px dashed #6366f1; transition: all 0.3s; cursor: move; }
         .btn-magic:hover { background: #312e81; border-style: solid; transform: translateY(-2px); }
         textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: #cbd5e1 !important; resize: none; transition: 0.3s; }
-        textarea:focus { border-color: #6366f1 !important; outline: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.1); }
+        textarea:focus { border-color: #6366f1 !important; outline: none; }
         .result-card { animation: slideUp 0.4s ease-out forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -29,11 +29,11 @@
         </header>
 
         <div class="mb-12 p-6 rounded-2xl bg-indigo-500/5 border border-indigo-500/20 text-center">
-            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Otomatik Çekme Yöntemi</h3>
-            <p class="text-[11px] text-gray-400 mb-6">Aşağıdaki butonu Yer İmleri çubuğuna sürükle. Instagram'da listeni açınca ona bas, gerisini Sancav halletsin.</p>
-            <a href="javascript:(function(){const getNames=()=>{const s=Array.from(document.querySelectorAll('span._ap35')).map(e=>e.innerText).filter(n=>n.length>2);return [...new Set(s)].join(',');};const flw=getNames();const url=window.location.origin;alert('Liste taranıyor...');window.location.href='https://'+window.location.host+'/分析?data='+btoa(flw);})();" 
-               class="btn-magic inline-block px-8 py-3 rounded-full text-xs font-bold text-indigo-300 cursor-move">
-               🚀 Sancav'ı Çubuğa Sürükle
+            <h3 class="text-xs font-bold text-indigo-400 uppercase tracking-widest mb-4">Otomatik Yöntem</h3>
+            <p class="text-[11px] text-gray-400 mb-6 font-medium">Bu butonu yer imleri çubuğuna sürükle. Instagram'da listeyi açınca bas.</p>
+            <a href="javascript:(function(){const getNames=()=>{const s=Array.from(document.querySelectorAll('span._ap35')).map(e=>e.innerText).filter(n=>n.length>2);return [...new Set(s)].join(',');};const data=getNames();if(data.length<1){alert('Önce listeyi aç ve aşağı kaydır!');return;}alert('Veri alındı, Sancav Analiz\'e gönderiliyor...');window.location.href='https://sancav-analiz.vercel.app/?data='+encodeURIComponent(data);})();" 
+               class="btn-magic inline-block px-10 py-4 rounded-full text-xs font-bold text-indigo-300">
+               🚀 Sancav Script'i Sürükle
             </a>
         </div>
 
@@ -43,7 +43,7 @@
                     <label class="text-[10px] font-black uppercase tracking-tighter text-indigo-500">Takip Ettiklerin</label>
                     <span id="countFollowing" class="text-[10px] font-mono text-gray-500">0</span>
                 </div>
-                <textarea id="following" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs"></textarea>
+                <textarea id="following" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs" placeholder="Otomatik dolacak veya yapıştır..."></textarea>
             </div>
 
             <div class="space-y-3">
@@ -51,7 +51,7 @@
                     <label class="text-[10px] font-black uppercase tracking-tighter text-indigo-500">Takipçilerin</label>
                     <span id="countFollowers" class="text-[10px] font-mono text-gray-500">0</span>
                 </div>
-                <textarea id="followers" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs"></textarea>
+                <textarea id="followers" oninput="updateCounts()" class="w-full h-44 p-5 rounded-2xl text-xs" placeholder="İkinci liste olarak buraya yapıştır..."></textarea>
             </div>
         </div>
 
@@ -73,11 +73,22 @@
     </footer>
 
     <script>
+        // URL'den gelen veriyi otomatik yakala
+        window.onload = function() {
+            const params = new URLSearchParams(window.location.search);
+            const data = params.get('data');
+            if (data) {
+                document.getElementById('following').value = decodeURIComponent(data).replace(/,/g, '\n');
+                updateCounts();
+                alert("Takip ettiklerin yüklendi! Şimdi takipçilerini de aynı şekilde veya manuel ekle.");
+            }
+        };
+
         function parseNames(text) {
             if (!text) return [];
             const regex = /([a-z0-9._]{3,30})/gi;
             const matches = text.match(regex) || [];
-            const filterOut = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested'];
+            const filterOut = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested', 'kapat', 'çıkış', 'ayarlar'];
             return [...new Set(matches.map(m => m.toLowerCase()))]
                    .filter(m => m.length > 2 && !filterOut.includes(m) && isNaN(m));
         }
@@ -92,7 +103,7 @@
             const followers = parseNames(document.getElementById('followers').value);
 
             if (following.length === 0 || followers.length === 0) {
-                alert("Önce verileri gir aga.");
+                alert("İki listeyi de doldurmalısın aga.");
                 return;
             }
 
@@ -105,17 +116,4 @@
             resultArea.classList.remove('hidden');
 
             unrequited.forEach(user => {
-                const card = document.createElement('div');
-                card.className = "result-card bg-slate-900/40 border border-slate-800 p-4 rounded-xl flex flex-col items-center justify-center gap-2 group hover:border-indigo-500/50 transition-all";
-                card.innerHTML = `
-                    <span class="text-[10px] font-bold text-slate-400 group-hover:text-indigo-300">@${user}</span>
-                    <a href="https://instagram.com/${user}" target="_blank" class="text-[8px] bg-indigo-500/10 text-indigo-400 px-3 py-1 rounded-full uppercase font-black tracking-tighter hover:bg-indigo-500 hover:text-white transition-all">Profili Aç</a>
-                `;
-                resultsDiv.appendChild(card);
-            });
-
-            resultArea.scrollIntoView({ behavior: 'smooth' });
-        }
-    </script>
-</body>
-</html>
+                const card = document
