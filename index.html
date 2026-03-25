@@ -3,127 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Umay ♡ Utku</title>
+    <title>Sancav | Takipçi Analiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: #050505;
-            color: white;
-            font-family: 'Times New Roman', serif;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            text-align: center;
-            overflow: hidden;
-        }
-        .container {
-            padding: 20px;
-            max-width: 450px;
-            width: 90%;
-            z-index: 2;
-        }
-        #surpriseContent { display: none; opacity: 0; transition: opacity 2s ease-in; }
-        h1 { font-size: 2.8rem; margin-bottom: 25px; font-weight: 300; letter-spacing: 2px; }
-        p { 
-            font-style: italic; 
-            line-height: 2; 
-            font-size: 1.2rem; 
-            margin-bottom: 15px;
-            color: #e0e0e0;
-        }
-        .heart-line { 
-            margin-top: 30px; 
-            font-size: 1.3rem; 
-            letter-spacing: 3px;
-            font-weight: bold;
-        }
-        .btn {
-            background: transparent;
-            color: white;
-            border: 1px solid white;
-            padding: 18px 50px;
-            font-size: 1.1rem;
-            letter-spacing: 4px;
-            cursor: pointer;
-            transition: all 0.5s ease;
-            text-transform: uppercase;
-        }
-        .btn:hover { 
-            background: white; 
-            color: black; 
-            box-shadow: 0 0 30px rgba(255,255,255,0.4);
-        }
-        .overlay {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle at center, #111 0%, #000 100%);
-            z-index: 1;
-        }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        textarea { resize: none; transition: all 0.3s ease; }
+        textarea:focus { border-color: #6366f1; outline: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+        .btn-sancav { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); transition: transform 0.2s; }
+        .btn-sancav:active { transform: scale(0.95); }
     </style>
 </head>
-<body>
-    <div class="overlay"></div>
+<body class="flex flex-col min-h-screen items-center p-4 md:p-10">
 
-    <div class="container">
-        <div id="startSection">
-            <button class="btn" id="startBtn">BAS</button>
+    <div class="w-full max-w-4xl glass p-6 md:p-8 rounded-2xl shadow-2xl">
+        <h1 class="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            Instagram Analiz
+        </h1>
+        <p class="text-center text-gray-400 text-sm mb-8">Takip ettiğin ama seni geri takip etmeyenleri anında bul.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Takip Ettiklerin (Following)</label>
+                <textarea id="following" placeholder="Kullanıcı adlarını yapıştır..." class="w-full h-48 p-4 rounded-xl bg-slate-900 border border-slate-700 text-sm"></textarea>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Takipçilerin (Followers)</label>
+                <textarea id="followers" placeholder="Kullanıcı adlarını yapıştır..." class="w-full h-48 p-4 rounded-xl bg-slate-900 border border-slate-700 text-sm"></textarea>
+            </div>
         </div>
 
-        <div id="surpriseContent">
-            <h1>Umay</h1>
-            <p>
-                Gözlerinde buldum ben en güzel rotayı,<br>
-                Seninle sildim kalbimdeki her hatayı.<br>
-                Bakışın ömre bedel, ruhuma sessiz bir dua,<br>
-                Varlığın nefes gibi, muhtacım her an sana.<br>
-                Duruyor sanki seni gördüğüm o an zaman,<br>
-                Ömrünün geri kalanında hep yanında kalacağım.
-            </p>
-            <div class="heart-line">UMAY 🤍 UTKU</div>
+        <button onclick="analyze()" class="w-full mt-8 py-4 rounded-xl btn-sancav font-bold text-lg shadow-lg">
+            Analiz Et
+        </button>
+
+        <div id="resultArea" class="hidden mt-10">
+            <h2 class="text-xl font-semibold mb-4 border-b border-slate-700 pb-2">Geri Takip Etmeyenler</h2>
+            <div id="results" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                </div>
         </div>
     </div>
 
-    <div id="player"></div>
+    <footer class="mt-auto py-8 text-gray-500 tracking-widest text-sm uppercase">
+        created by sancav
+    </footer>
 
     <script>
-        var tag = document.createElement('script');
-        tag.src = "https://www.youtube.com/iframe_api";
-        var firstScriptTag = document.getElementsByTagName('script')[0];
-        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-        var player;
-        function onYouTubeIframeAPIReady() {
-            player = new YT.Player('player', {
-                height: '0',
-                width: '0',
-                videoId: '_UbhwIPyRHY',
-                playerVars: {
-                    'autoplay': 0,
-                    'controls': 0,
-                    'disablekb': 1,
-                    'fs': 0,
-                    'modestbranding': 1,
-                    'rel': 0,
-                    'start': 148 // 2:28 Gitar Kısmı
-                }
-            });
-        }
-
-        document.getElementById('startBtn').addEventListener('click', function() {
-            // Yazıları göster
-            document.getElementById('startSection').style.display = 'none';
-            var content = document.getElementById('surpriseContent');
-            content.style.display = 'block';
-            setTimeout(() => { content.style.opacity = '1'; }, 100);
-
-            // Müziği oynat ve saniyeyi tekrar kontrol et
-            if (player && player.playVideo) {
-                player.seekTo(148); 
-                player.unMute();
-                player.playVideo();
+        function analyze() {
+            const followingInput = document.getElementById('following').value.toLowerCase().split(/\n| /).filter(item => item.trim() !== "");
+            const followersInput = document.getElementById('followers').value.toLowerCase().split(/\n| /).filter(item => item.trim() !== "");
+            
+            // Küme farkı hesabı: Following - Followers
+            const nonFollowers = followingInput.filter(user => !followersInput.includes(user));
+            
+            const resultArea = document.getElementById('resultArea');
+            const resultsDiv = document.getElementById('results');
+            
+            resultsDiv.innerHTML = "";
+            
+            if (nonFollowers.length > 0) {
+                resultArea.classList.remove('hidden');
+                nonFollowers.forEach(user => {
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-800 p-3 rounded-lg text-center text-indigo-300 border border-slate-700 text-sm font-mono truncate";
+                    div.textContent = "@" + user;
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                alert("Herkes seni takip ediyor veya listeler hatalı.");
             }
-        });
+        }
     </script>
 </body>
 </html>
