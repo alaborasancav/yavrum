@@ -3,82 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sancav | Kaçak Avcısı</title>
+    <title>Sancav | Takipçi Analiz</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #030712; color: #f9fafb; font-family: 'Inter', sans-serif; }
-        .glass { background: rgba(17, 24, 39, 0.85); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.05); }
-        .sancav-gradient { background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); }
-        textarea { background: #0f172a !important; border: 1px solid #1e293b !important; color: #cbd5e1 !important; resize: none; transition: 0.3s; }
-        textarea:focus { border-color: #6366f1 !important; outline: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.15); }
+        body { background-color: #0f172a; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+        textarea { resize: none; transition: all 0.3s ease; }
+        textarea:focus { border-color: #6366f1; outline: none; box-shadow: 0 0 15px rgba(99, 102, 241, 0.3); }
+        .btn-sancav { background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%); transition: transform 0.2s; }
+        .btn-sancav:active { transform: scale(0.95); }
     </style>
 </head>
 <body class="flex flex-col min-h-screen items-center p-4 md:p-10">
 
-    <div class="w-full max-w-4xl glass p-8 md:p-12 rounded-[2.5rem] shadow-2xl mt-4">
-        <header class="text-center mb-10">
-            <h1 class="text-4xl font-black italic tracking-tighter uppercase text-white bg-gradient-to-r from-indigo-400 to-purple-500 bg-clip-text text-transparent">
-                Sancav Analiz
-            </h1>
-            <p class="text-gray-500 text-[10px] mt-2 tracking-[0.4em] uppercase font-bold">Hızlı Analiz • Kaçak Avcısı</p>
-        </header>
+    <div class="w-full max-w-4xl glass p-6 md:p-8 rounded-2xl shadow-2xl">
+        <h1 class="text-3xl font-bold text-center mb-2 bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">
+            Instagram Analiz
+        </h1>
+        <p class="text-center text-gray-400 text-sm mb-8">Takip ettiğin ama seni geri takip etmeyenleri anında bul.</p>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Takip Ettiklerin (Following)</label>
-                <textarea id="following" class="w-full h-64 p-5 rounded-2xl text-xs" placeholder="Listeyi buraya yapıştır..."></textarea>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Takip Ettiklerin (Following)</label>
+                <textarea id="following" placeholder="Kullanıcı adlarını yapıştır..." class="w-full h-48 p-4 rounded-xl bg-slate-900 border border-slate-700 text-sm"></textarea>
             </div>
-            <div class="space-y-3">
-                <label class="text-[10px] font-black uppercase tracking-widest text-indigo-500">Takipçilerin (Followers)</label>
-                <textarea id="followers" class="w-full h-64 p-5 rounded-2xl text-xs" placeholder="Listeyi buraya yapıştır..."></textarea>
+            <div>
+                <label class="block text-sm font-medium text-gray-300 mb-2">Takipçilerin (Followers)</label>
+                <textarea id="followers" placeholder="Kullanıcı adlarını yapıştır..." class="w-full h-48 p-4 rounded-xl bg-slate-900 border border-slate-700 text-sm"></textarea>
             </div>
         </div>
 
-        <button onclick="startSancavHunt()" class="w-full mt-10 py-6 rounded-2xl sancav-gradient font-black text-white text-sm uppercase tracking-[0.3em] shadow-2xl active:scale-95 transition-all">
-            ANALİZİ BAŞLAT
+        <button onclick="analyze()" class="w-full mt-8 py-4 rounded-xl btn-sancav font-bold text-lg shadow-lg">
+            Analiz Et
         </button>
 
-        <div id="resultArea" class="hidden mt-16 border-t border-slate-800 pt-10">
-            <div class="flex justify-between items-center mb-8 px-2">
-                <h2 class="text-xl font-black italic uppercase text-white">Seni Takip Etmeyenler</h2>
-                <span id="badCount" class="text-red-500 font-black text-xs">0 KİŞİ</span>
-            </div>
-            <div id="results" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4"></div>
+        <div id="resultArea" class="hidden mt-10">
+            <h2 class="text-xl font-semibold mb-4 border-b border-slate-700 pb-2">Geri Takip Etmeyenler</h2>
+            <div id="results" class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                </div>
         </div>
     </div>
 
+    <footer class="mt-auto py-8 text-gray-500 tracking-widest text-sm uppercase">
+        created by sancav
+    </footer>
+
     <script>
-        function extractUsernames(text) {
-            if (!text) return [];
-            const regex = /([a-z0-9._]{3,30})/gi;
-            const matches = text.match(regex) || [];
-            const garbage = ['verified', 'follow', 'following', 'takip', 'et', 'profil', 'resmi', 'post', 'followers', 'posts', 'message', 'suggested', 'kapat', 'ayarlar', 'hikaye', 'beğen', 'yanıtla', 'gönder', 'paylaş', 'kaydet', 'tümü', 'gör', 'kullanıcısının', 'fotoğrafı', 'videosu', 'onaylı', 'hesap', 'paylaşımı', 'görüntüle', 'ara', 'keşfet', 'profiline'];
-            return [...new Set(matches.map(m => m.toLowerCase()))].filter(m => m.length > 2 && !garbage.includes(m) && isNaN(m));
-        }
-
-        function startSancavHunt() {
-            const following = extractUsernames(document.getElementById('following').value);
-            const followers = extractUsernames(document.getElementById('followers').value);
-
-            if (following.length === 0 || followers.length === 0) {
-                alert("Önce listeleri yapıştır aga.");
-                return;
-            }
-
-            const losers = following.filter(u => !followers.includes(u));
+        function analyze() {
+            const followingInput = document.getElementById('following').value.toLowerCase().split(/\n| /).filter(item => item.trim() !== "");
+            const followersInput = document.getElementById('followers').value.toLowerCase().split(/\n| /).filter(item => item.trim() !== "");
+            
+            // Küme farkı hesabı: Following - Followers
+            const nonFollowers = followingInput.filter(user => !followersInput.includes(user));
+            
+            const resultArea = document.getElementById('resultArea');
             const resultsDiv = document.getElementById('results');
+            
             resultsDiv.innerHTML = "";
-            document.getElementById('badCount').innerText = losers.length + " KİŞİ";
-            document.getElementById('resultArea').classList.remove('hidden');
-
-            losers.forEach(user => {
-                const card = document.createElement('div');
-                card.className = "bg-[#0d1321] p-4 rounded-xl border border-slate-800 flex flex-col items-center";
-                card.innerHTML = `<span class='text-[10px] font-bold text-slate-300'>@${user}</span><a href='https://instagram.com/${user}' target='_blank' class='text-[8px] mt-2 text-indigo-400'>PROFİL</a>`;
-                resultsDiv.appendChild(card);
-            });
-            document.getElementById('resultArea').scrollIntoView({ behavior: 'smooth' });
+            
+            if (nonFollowers.length > 0) {
+                resultArea.classList.remove('hidden');
+                nonFollowers.forEach(user => {
+                    const div = document.createElement('div');
+                    div.className = "bg-slate-800 p-3 rounded-lg text-center text-indigo-300 border border-slate-700 text-sm font-mono truncate";
+                    div.textContent = "@" + user;
+                    resultsDiv.appendChild(div);
+                });
+            } else {
+                alert("Herkes seni takip ediyor veya listeler hatalı.");
+            }
         }
     </script>
 </body>
